@@ -1,0 +1,27 @@
+package main
+import "fmt"
+
+type Employee struct {
+	name        string
+	Companyname string
+	salary      float64
+}
+
+func updateSalary(emp *Employee, newsalary float64) {
+	emp.salary = newsalary
+}
+
+func main() {
+	emp := Employee{
+		name:        "Nivan,",
+		Companyname: "Siemens,",
+		salary:      10000.0,
+	}
+	emp2 := Employee{"Riya,", "Siemens,", 12000.0}
+
+	updateSalary(&emp, 15000.0)
+
+	fmt.Println("Employee1 Details:", emp)
+	fmt.Println("Employee2 Details:", emp2)
+	fmt.Println("Updated Salary: ", emp.salary)
+}
