@@ -9,15 +9,12 @@ func worker(id int, jobs <-chan int, results chan<- int) {
 	for job := range jobs { // Continuously listen for jobs in jobs channel
 		// Simulate work with sleep
 		time.Sleep(time.Second)
-		// Print the worker and the job it's processing
 		fmt.Printf("Worker %d processed job %d\n", id, job)
-		// Send result back to the results channel
-		results <- job * 2 // Result is the job number multiplied by 2
+		results <- job * 2
 	}
 }
 
 func main() {
-	// Create channels
 	jobs := make(chan int, 5)    // jobs channel for sending jobs to workers
 	results := make(chan int, 5) // results channel for collecting results
 
@@ -30,12 +27,11 @@ func main() {
 	for i := 1; i <= 5; i++ {
 		jobs <- i
 	}
-	close(jobs) // Close the jobs channel to signal workers
+	close(jobs)
 
 	// Collect results from the results channel (fan-in pattern)
 	for i := 1; i <= 5; i++ {
-		fmt.Println("Received:", <-results) // Read results from results channel
+		fmt.Println("Received:", <-results)
 	}
-
-	close(results) // Close results channel when done
+	close(results)
 }
