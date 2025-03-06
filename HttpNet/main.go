@@ -24,6 +24,7 @@ func main() {
 
 	mux.HandleFunc("POST /users", createUser)
 	mux.HandleFunc("GET /users/{id}", getUser)
+	mux.HandleFunc("PUT /users/{id}", updateUser)
 	mux.HandleFunc("DELETE /users/{id}", deleteUser)
 
 	fmt.Println("Listning to server: 8080")
@@ -101,4 +102,46 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	cacheMutex.Unlock()
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// Define the updateUser handler
+func updateUser(w http.ResponseWriter, r *http.Request) {
+	// Extract user ID from the path
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	// Decode the incoming JSON body into a User struct
+	var updatedUser User
+	err = json.NewDecoder(r.Body).Decode(&updatedUser)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the user exists in the cache
+	cacheMutex.Lock()
+	user, exists := userCache[id]
+	if !exists {
+		cacheMutex.Unlock()
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	// Update user information
+	if updatedUser.Name != "" {
+		user.Name = updatedUser.Name
+	}
+	if updatedUser.age != 0 {
+		user.age = updatedUser.age
+	}
+	userCache[id] = user
+	cacheMutex.Unlock()
+
+	// Respond with a success status
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
 }
